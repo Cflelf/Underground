@@ -14,7 +14,15 @@
 
 #define ScreenWidth [[UIScreen mainScreen] bounds].size.width
 
+#define ScreenHeight [[UIScreen mainScreen] bounds].size.height
+
 #define ThemeColor [UIColor colorWithHexString:@"#5AC8FA"]
+
+#define LightGreyColor [UIColor colorWithHexString:@"#FBFBFB"]
+
+#define PFStartColor [UIColor colorWithHexString:@"#bae2be"]
+
+#define PFEndColor [UIColor colorWithHexString:@"#ff5959"] 
 
 #define SeparatorColor [UIColor colorWithHexString:@"#D1D1D1"]
 

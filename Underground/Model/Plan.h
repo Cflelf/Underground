@@ -7,12 +7,25 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "location.h"
+#import <AMapSearchKit/AMapSearchKit.h>
+
+@interface MyBusStop : NSObject
+
+@property(nonatomic,strong)AMapBusStop *stop;
+@property(nonatomic,strong)NSString *line;
+
+@end
 
 @interface Plan : NSObject
 
 @property(nonatomic,strong)NSMutableArray<NSString *> *viaLines;
-@property(nonatomic,strong)NSMutableArray<location *> *changePlatforms;
-@property(nonatomic,strong)NSMutableArray<location *> *viaPlatforms;
+@property(nonatomic,strong)NSMutableArray<AMapBusStop *> *changePlatforms;
+@property(nonatomic,strong)NSMutableArray<MyBusStop *> *viaPlatforms;
+@property(nonatomic,assign)long cost;
+@property(nonatomic,assign)long duration;
+@property(nonatomic,assign)long walkingDistance;
+@property(nonatomic,assign)Boolean isOpen;
+
+-(instancetype)initWithRoute:(NSMutableArray<AMapBusLine *> *)busLines transits:(AMapTransit *)transits;
 
 @end

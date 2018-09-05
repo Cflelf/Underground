@@ -12,11 +12,14 @@
 #import "MetroReminderVC.h"
 #import <QuartzCore/QuartzCore.h>
 #import "Tools.h"
+#import "HistoryLabel.h"
 
 @interface HistoryCollectionViewCell ()
 
 @property(nonatomic,strong)UILabel *copylabel;
-//@property(nonatomic,assign)Boolean isLongPress;
+@property(nonatomic,assign)CGPoint startPoint;
+@property(nonatomic,strong)UISelectionFeedbackGenerator *feed;
+@property(nonatomic,strong)UIButton *trashButton;
 
 @end
 
@@ -26,42 +29,35 @@
     self = [super initWithFrame:frame];
     
     [self setUserInteractionEnabled:true];
-
-    self.label = [[UILabel alloc] init];
-    self.label.font = [UIFont systemFontOfSize:13];
-    self.label.textColor = ThemeColor;
+    
+    self.label = [[HistoryLabel alloc] init];
     [self.contentView addSubview:self.label];
     
-    self.label.layer.borderColor = UIColor.lightGrayColor.CGColor;
-    self.label.layer.borderWidth = 0.5f;
-    self.label.layer.cornerRadius = 5;
-    [self.label mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.center.equalTo(@0);
-    }];
+    UILongPressGestureRecognizer *rec = [[UILongPressGestureRecognizer alloc]initWithTarget:self action:@selector(longPress:)];
+    rec.minimumPressDuration = 0.3;
+    [self addGestureRecognizer:rec];
     
-//    UILongPressGestureRecognizer *rec = [[UILongPressGestureRecognizer alloc]initWithTarget:self action:@selector(longPress:)];
-//    rec.minimumPressDuration = 0.5;
-//    [self addGestureRecognizer:rec];
+    self.trashButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 44, 44)];
+    [self.trashButton setImage:[UIImage imageNamed:@"trash_close"] forState:UIControlStateNormal];
+    [self.trashButton setImage:[UIImage imageNamed:@"trash_open"] forState:UIControlStateSelected];
     
     return self;
 }
 
+- (void)layoutSubviews{
+    [super layoutSubviews];
+    __weak typeof(self) weakSelf = self;
+    [self.label mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.center.equalTo(@0);
+        make.width.equalTo(weakSelf.contentView.mas_width);
+    }];
+}
+
+
 - (void)longPress:(UILongPressGestureRecognizer *)gesture   {
     if(gesture.state == UIGestureRecognizerStateBegan){
-        NSLog(@"长按开始");
-    }
-}
-
-
-- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-    
-}
-
-- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
         if(!self.copylabel){
-            self.copylabel = [[UILabel alloc] init];
-            self.copylabel.font = [UIFont systemFontOfSize:13];
-            self.copylabel.textColor = ThemeColor;
+            self.copylabel = [[HistoryLabel alloc] init];
             self.copylabel.frame = [self.label convertRect:self.label.frame toView:nil];
             self.copylabel.text = self.label.text;
             
@@ -71,22 +67,29 @@
             self.copylabel.center = center;
             
             [self.window addSubview:self.copylabel];
+            
+            self.feed = [[UISelectionFeedbackGenerator alloc] init];
+            
+            [self.feed selectionChanged];
+            [self.feed prepare];
+            
+            MetroReminderVC *vc = (MetroReminderVC *)[Tools getCurrentVC];
+            vc.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc]initWithCustomView:self.trashButton];
         }
         
-        UITouch *touch = [touches anyObject];
-        
+        self.startPoint = [gesture locationInView:self.superview];
+    }else if(gesture.state == UIGestureRecognizerStateChanged){
+        self.feed = nil;
         // 当前触摸点
-        CGPoint currentPoint = [touch locationInView:self.superview];
+        CGPoint currentPoint = [gesture locationInView:self.superview];
         // 上一个触摸点
-        CGPoint previousPoint = [touch previousLocationInView:self.superview];
+        CGPoint previousPoint = self.startPoint;
         
         // 当前view的中点
         CGPoint center = self.copylabel.center;
         
         center.x += (currentPoint.x - previousPoint.x);
         center.y += (currentPoint.y - previousPoint.y);
-        
-        
         
         self.copylabel.center = center;
         
@@ -108,36 +111,45 @@
         }else{
             vc.endPF.layer.borderWidth = 0;
         }
-}
-
-- (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
-    
-    MetroReminderVC *vc = (MetroReminderVC *)[Tools getCurrentVC];
-    CGRect rect = [vc.startPF convertRect:vc.startPF.frame toView:vc.view];
-    if (CGRectIntersectsRect(rect, self.copylabel.frame)) {
-        vc.startPF.text = self.copylabel.text;
-    }
         
-    rect = [vc.endPF convertRect:vc.startPF.frame toView:vc.view];
-    if (CGRectIntersectsRect(rect, self.copylabel.frame)) {
-        vc.endPF.text = self.copylabel.text;
-    }
+        rect = [self.trashButton convertRect:self.trashButton.frame toView:vc.view];
+        if (CGRectIntersectsRect(rect, self.copylabel.frame)) {
+            [self.trashButton setSelected:true];
+        }else{
+            [self.trashButton setSelected:false];
+        }
         
-    vc.endPF.layer.borderWidth = 0;
-    vc.startPF.layer.borderWidth = 0;
-    [self.copylabel removeFromSuperview];
-    self.copylabel = nil;
-    
+        self.startPoint = currentPoint;
+    }else if(gesture.state == UIGestureRecognizerStateEnded){
+        MetroReminderVC *vc = (MetroReminderVC *)[Tools getCurrentVC];
+        CGRect rect = [vc.startPF convertRect:vc.startPF.frame toView:vc.view];
+        if (CGRectIntersectsRect(rect, self.copylabel.frame)) {
+            vc.startPF.text = self.copylabel.text;
+        }
+        
+        rect = [vc.endPF convertRect:vc.startPF.frame toView:vc.view];
+        if (CGRectIntersectsRect(rect, self.copylabel.frame)) {
+            vc.endPF.text = self.copylabel.text;
+        }
+        
+        rect = [self.trashButton convertRect:self.trashButton.frame toView:vc.view];
+        if (CGRectIntersectsRect(rect, self.copylabel.frame)) {
+            [vc deleteHistory:self.label.text];
+        }
+        
+        vc.navigationItem.rightBarButtonItem = nil;
+        vc.endPF.layer.borderWidth = 0;
+        vc.startPF.layer.borderWidth = 0;
+        [self.copylabel removeFromSuperview];
+        self.copylabel = nil;
+    }else if(gesture.state == UIGestureRecognizerStateCancelled){
+        MetroReminderVC *vc = (MetroReminderVC *)[Tools getCurrentVC];
+        vc.navigationItem.rightBarButtonItem = nil;
+        vc.endPF.layer.borderWidth = 0;
+        vc.startPF.layer.borderWidth = 0;
+        [self.copylabel removeFromSuperview];
+        self.copylabel = nil;
+    }
 }
-
-- (void)touchesCancelled:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
-    MetroReminderVC *vc = (MetroReminderVC *)[Tools getCurrentVC];
-    vc.endPF.layer.borderWidth = 0;
-    vc.startPF.layer.borderWidth = 0;
-    [self.copylabel removeFromSuperview];
-    self.copylabel = nil;
-}
-
-
 
 @end

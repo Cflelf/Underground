@@ -35,7 +35,7 @@
     self.startPoint = nil;
     self.endPoint = nil;
     
-    if (HISTORYS) {
+    if (HISTORYS && ((NSArray *)HISTORYS).count) {
         [self.historyView setHidden:false];
         [self.historyCollectionView reloadData];
     }
@@ -52,13 +52,12 @@
     
     self.historyCollectionView.delegate = self;
     self.historyCollectionView.dataSource = self;
-    self.historyCollectionView.delaysContentTouches = false;
-    self.historyCollectionView.canCancelContentTouches = false;
     [self.historyCollectionView registerClass:HistoryCollectionViewCell.class forCellWithReuseIdentifier:@"History"];
     
     UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
     layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
     [self.historyCollectionView setCollectionViewLayout:layout animated:true];
+    
 }
 
 - (void)didReceiveMemoryWarning {
@@ -77,21 +76,20 @@
 }
 
 - (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout minimumInteritemSpacingForSectionAtIndex:(NSInteger)section {
-    return 15.0f;
+    return 8.0f;
 }
 
 - (CGSize)sizingForRowAtIndexPath:(NSIndexPath *)indexPath {
-    static HistoryCollectionViewCell *sizingCell = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        sizingCell = [[HistoryCollectionViewCell alloc] init];
-    });
+    HistoryCollectionViewCell *sizingCell = nil;
+    sizingCell = [[HistoryCollectionViewCell alloc] init];
+    
     NSMutableArray *array = [[NSMutableArray alloc] initWithArray:HISTORYS];
     sizingCell.label.text = array[indexPath.row];
     [sizingCell.label sizeToFit];
+    
     [sizingCell setNeedsLayout];
     [sizingCell layoutIfNeeded];
-    CGSize cellSize = CGSizeMake(sizingCell.label.frame.size.width, sizingCell.label.frame.size.height);
+    CGSize cellSize = CGSizeMake(sizingCell.label.frame.size.width+12, 30);
     return cellSize;
 }
 
@@ -102,10 +100,9 @@
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath{
     HistoryCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"History" forIndexPath:indexPath];
-    
     cell.label.text = HISTORYS[indexPath.row];
-    [cell.label sizeToFit];
-    
+    [cell setNeedsLayout];
+    [cell layoutIfNeeded];
     return cell;
 }
 
@@ -125,7 +122,7 @@
     NSString *start = self.startPF.text;
     NSString *end = self.endPF.text;
     
-    if (start.length == 0 || start.length == 0) {
+    if (start.length == 0 || end.length == 0) {
         [self.view showMyToast:@"请填写完整"];
         return;
     }else if([start isEqualToString:end]){
@@ -202,6 +199,17 @@
     }
 }
 
+- (void)deleteHistory:(NSString *)name{
+    NSMutableArray *array = [[NSMutableArray alloc] initWithArray:HISTORYS];
+    
+    if ([array containsObject:name]) {
+        [array removeObject:name];
+    }
+    
+    [NSUserDefaults.standardUserDefaults setObject:array forKey:@"History"];
+    [self.historyCollectionView reloadData];
+}
+
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender{
     if ([segue.identifier isEqualToString:@"choosePlan"]) {
         ChoosePlanVC *vc = segue.destinationViewController;
@@ -209,11 +217,9 @@
     }
 }
 
-- (void)AMapSearchRequest:(id)request didFailWithError:(NSError *)error
-{
+- (void)AMapSearchRequest:(id)request didFailWithError:(NSError *)error{
     NSLog(@"Error: %@", error);
 }
-
 /*
 #pragma mark - Navigation
 

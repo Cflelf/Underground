@@ -10,7 +10,5 @@
 #import <AMapSearchKit/AMapSearchKit.h>
 
 @interface ChoosePlanVC : UIViewController
-
 @property(nonatomic,strong)AMapRoute *route;
-
 @end

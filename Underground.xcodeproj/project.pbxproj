@@ -28,10 +28,12 @@
 		2EEACEDC213544A700A2826C /* HistoryCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2EEACEDB213544A700A2826C /* HistoryCollectionViewCell.m */; };
 		2EEACEDF213647C300A2826C /* Tools.m in Sources */ = {isa = PBXBuildFile; fileRef = 2EEACEDE213647C200A2826C /* Tools.m */; };
 		2EEACEE32136680000A2826C /* PlanTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2EEACEE12136680000A2826C /* PlanTableViewCell.m */; };
-		2EEACEE42136680000A2826C /* PlanTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2EEACEE22136680000A2826C /* PlanTableViewCell.xib */; };
 		2EEACEE721366FA400A2826C /* MetroLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 2EEACEE621366FA400A2826C /* MetroLabel.m */; };
 		2EEACEEA2136720000A2826C /* Plan.m in Sources */ = {isa = PBXBuildFile; fileRef = 2EEACEE92136720000A2826C /* Plan.m */; };
-		2EEACEED213673FD00A2826C /* location.m in Sources */ = {isa = PBXBuildFile; fileRef = 2EEACEEC213673FD00A2826C /* location.m */; };
+		2EEACEF02137B60400A2826C /* HistoryLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 2EEACEEF2137B60400A2826C /* HistoryLabel.m */; };
+		2EEACEF321392E0500A2826C /* ChangePFButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 2EEACEF221392E0500A2826C /* ChangePFButton.m */; };
+		2EEACEFC213BA46C00A2826C /* PlanTableHeaderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2EEACEFB213BA46C00A2826C /* PlanTableHeaderView.m */; };
+		2EEACEFF213E82D500A2826C /* GeoFenceViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2EEACEFE213E82D500A2826C /* GeoFenceViewController.m */; };
 		88F107F4D17C4A313C9B7BCA /* Pods_Underground.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CCFE9F7784A2BE6A1D78E96 /* Pods_Underground.framework */; };
 /* End PBXBuildFile section */
 
@@ -96,13 +98,18 @@
 		2EEACEDE213647C200A2826C /* Tools.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Tools.m; sourceTree = "<group>"; };
 		2EEACEE02136680000A2826C /* PlanTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PlanTableViewCell.h; sourceTree = "<group>"; };
 		2EEACEE12136680000A2826C /* PlanTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PlanTableViewCell.m; sourceTree = "<group>"; };
-		2EEACEE22136680000A2826C /* PlanTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = PlanTableViewCell.xib; sourceTree = "<group>"; };
 		2EEACEE521366FA400A2826C /* MetroLabel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MetroLabel.h; sourceTree = "<group>"; };
 		2EEACEE621366FA400A2826C /* MetroLabel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MetroLabel.m; sourceTree = "<group>"; };
 		2EEACEE82136720000A2826C /* Plan.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Plan.h; sourceTree = "<group>"; };
 		2EEACEE92136720000A2826C /* Plan.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Plan.m; sourceTree = "<group>"; };
-		2EEACEEB213673FD00A2826C /* location.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = location.h; sourceTree = "<group>"; };
-		2EEACEEC213673FD00A2826C /* location.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = location.m; sourceTree = "<group>"; };
+		2EEACEEE2137B60400A2826C /* HistoryLabel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HistoryLabel.h; sourceTree = "<group>"; };
+		2EEACEEF2137B60400A2826C /* HistoryLabel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HistoryLabel.m; sourceTree = "<group>"; };
+		2EEACEF121392E0500A2826C /* ChangePFButton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ChangePFButton.h; sourceTree = "<group>"; };
+		2EEACEF221392E0500A2826C /* ChangePFButton.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ChangePFButton.m; sourceTree = "<group>"; };
+		2EEACEFA213BA46C00A2826C /* PlanTableHeaderView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PlanTableHeaderView.h; sourceTree = "<group>"; };
+		2EEACEFB213BA46C00A2826C /* PlanTableHeaderView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PlanTableHeaderView.m; sourceTree = "<group>"; };
+		2EEACEFD213E82D500A2826C /* GeoFenceViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeoFenceViewController.h; sourceTree = "<group>"; };
+		2EEACEFE213E82D500A2826C /* GeoFenceViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GeoFenceViewController.m; sourceTree = "<group>"; };
 		8CCFE9F7784A2BE6A1D78E96 /* Pods_Underground.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Underground.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A6DF8E64A87B29CB934A54E8 /* Pods-Underground.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Underground.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Underground/Pods-Underground.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -212,8 +219,6 @@
 				2E699B03212E90BC009AECEA /* MetroInfo.m */,
 				2EEACEE82136720000A2826C /* Plan.h */,
 				2EEACEE92136720000A2826C /* Plan.m */,
-				2EEACEEB213673FD00A2826C /* location.h */,
-				2EEACEEC213673FD00A2826C /* location.m */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -229,6 +234,8 @@
 				2E699B1F2133AC26009AECEA /* MetroReminderVC.m */,
 				2EEACED02133E2AE00A2826C /* ChoosePlanVC.h */,
 				2EEACED12133E2AE00A2826C /* ChoosePlanVC.m */,
+				2EEACEFD213E82D500A2826C /* GeoFenceViewController.h */,
+				2EEACEFE213E82D500A2826C /* GeoFenceViewController.m */,
 			);
 			path = VC;
 			sourceTree = "<group>";
@@ -255,9 +262,14 @@
 				2EEACEDB213544A700A2826C /* HistoryCollectionViewCell.m */,
 				2EEACEE02136680000A2826C /* PlanTableViewCell.h */,
 				2EEACEE12136680000A2826C /* PlanTableViewCell.m */,
-				2EEACEE22136680000A2826C /* PlanTableViewCell.xib */,
 				2EEACEE521366FA400A2826C /* MetroLabel.h */,
 				2EEACEE621366FA400A2826C /* MetroLabel.m */,
+				2EEACEEE2137B60400A2826C /* HistoryLabel.h */,
+				2EEACEEF2137B60400A2826C /* HistoryLabel.m */,
+				2EEACEF121392E0500A2826C /* ChangePFButton.h */,
+				2EEACEF221392E0500A2826C /* ChangePFButton.m */,
+				2EEACEFA213BA46C00A2826C /* PlanTableHeaderView.h */,
+				2EEACEFB213BA46C00A2826C /* PlanTableHeaderView.m */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -390,7 +402,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2EEACEE42136680000A2826C /* PlanTableViewCell.xib in Resources */,
 				2EEACED9213526A000A2826C /* transMetro.plist in Resources */,
 				2E699AD5212BDFBB009AECEA /* LaunchScreen.storyboard in Resources */,
 				2E699AD2212BDFBB009AECEA /* Assets.xcassets in Resources */,
@@ -422,13 +433,16 @@
 			files = (
 			);
 			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
 			);
 			name = "[CP] Check Pods Manifest.lock";
 			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-Underground-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
 		9B4E69C1DAC33F3CF3C480E8 /* [CP] Copy Pods Resources */ = {
@@ -437,9 +451,12 @@
 			files = (
 			);
 			inputPaths = (
+				"${SRCROOT}/Pods/Target Support Files/Pods-Underground/Pods-Underground-resources.sh",
+				"${PODS_ROOT}/AMap2DMap/MAMapKit.framework/AMap.bundle",
 			);
 			name = "[CP] Copy Pods Resources";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/AMap.bundle",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -452,9 +469,22 @@
 			files = (
 			);
 			inputPaths = (
+				"${SRCROOT}/Pods/Target Support Files/Pods-Underground/Pods-Underground-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/AFNetworking/AFNetworking.framework",
+				"${BUILT_PRODUCTS_DIR}/KVOMutableArray/KVOMutableArray.framework",
+				"${BUILT_PRODUCTS_DIR}/Masonry/Masonry.framework",
+				"${BUILT_PRODUCTS_DIR}/Reachability/Reachability.framework",
+				"${BUILT_PRODUCTS_DIR}/ReactiveCocoa/ReactiveCocoa.framework",
+				"${BUILT_PRODUCTS_DIR}/Toast/Toast.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/AFNetworking.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/KVOMutableArray.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Masonry.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Reachability.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/ReactiveCocoa.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Toast.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -473,15 +503,18 @@
 				2E699B13212EB156009AECEA /* UIColor+Hex.m in Sources */,
 				2EEACEE721366FA400A2826C /* MetroLabel.m in Sources */,
 				2E699B1D2133A09D009AECEA /* ChoosePlatformVC.m in Sources */,
+				2EEACEF321392E0500A2826C /* ChangePFButton.m in Sources */,
+				2EEACEF02137B60400A2826C /* HistoryLabel.m in Sources */,
 				2EEACEDC213544A700A2826C /* HistoryCollectionViewCell.m in Sources */,
 				2E699B04212E90BC009AECEA /* MetroInfo.m in Sources */,
 				2E699B1A212FFBAE009AECEA /* LocateHeaderView.m in Sources */,
+				2EEACEFF213E82D500A2826C /* GeoFenceViewController.m in Sources */,
 				2EEACEDF213647C300A2826C /* Tools.m in Sources */,
+				2EEACEFC213BA46C00A2826C /* PlanTableHeaderView.m in Sources */,
 				2EEACED52133ED4000A2826C /* UIView+Toast.m in Sources */,
 				2EEACED22133E2AE00A2826C /* ChoosePlanVC.m in Sources */,
 				2E699B17212FECC0009AECEA /* LineHeaderView.m in Sources */,
 				2EEACEEA2136720000A2826C /* Plan.m in Sources */,
-				2EEACEED213673FD00A2826C /* location.m in Sources */,
 				2E699AD8212BDFBB009AECEA /* main.m in Sources */,
 				2E699ACA212BDFB9009AECEA /* AppDelegate.m in Sources */,
 				2E699B202133AC26009AECEA /* MetroReminderVC.m in Sources */,

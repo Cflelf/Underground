@@ -8,11 +8,22 @@
 
 #import <UIKit/UIKit.h>
 #import "MetroLabel.h"
-#import <AMapSearchKit/AMapSearchKit.h>
+#import "Plan.h"
+
+typedef enum _MetroPFType{
+    MetroPFTypeStart = 0,
+    MetroPFTypeChange,
+    MetroPFTypeEnd
+} MetroPFType;
+
+@interface MetroPFTypeLabel : UILabel
+- (instancetype)initWithStyle:(MetroPFType)type text:(NSString *)str;
+@end
 
 @interface PlanTableViewCell : UITableViewCell
 @property (weak, nonatomic) IBOutlet UIButton *chooseButton;
-@property (weak, nonatomic) IBOutlet UIStackView *stackView;
-@property (weak, nonatomic) IBOutlet MetroLabel *metroLabel;
-@property (nonatomic, strong) NSArray<AMapSegment *> *segments;
+@property (weak, nonatomic) IBOutlet UILabel *titleLabel;
+@property (weak, nonatomic) IBOutlet UILabel *subTitle;
+@property (strong,nonatomic) MetroPFTypeLabel *typeLabel;
+@property (strong,nonatomic) AMapBusStop *stop;
 @end

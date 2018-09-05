@@ -14,33 +14,73 @@ PODS:
   - AFNetworking/Serialization (3.2.1)
   - AFNetworking/UIKit (3.2.1):
     - AFNetworking/NSURLSession
+  - AMap2DMap (5.6.0):
+    - AMapFoundation (~> 1.4)
   - AMapFoundation (1.5.3)
   - AMapLocation (2.6.1):
     - AMapFoundation (~> 1.4)
   - AMapSearch (6.1.1):
     - AMapFoundation (~> 1.4)
+  - KVOMutableArray (2.2.0):
+    - KVOMutableArray/Core (= 2.2.0)
+  - KVOMutableArray/Core (2.2.0)
   - Masonry (1.1.0)
   - Reachability (3.2)
+  - ReactiveCocoa (2.5.2):
+    - ReactiveCocoa/UI (= 2.5.2)
+  - ReactiveCocoa/Core (2.5.2):
+    - ReactiveCocoa/no-arc
+  - ReactiveCocoa/no-arc (2.5.2)
+  - ReactiveCocoa/UI (2.5.2):
+    - ReactiveCocoa/Core
   - Toast (4.0.0)
 
 DEPENDENCIES:
   - AFNetworking
+  - AMap2DMap
   - AMapFoundation
   - AMapLocation
   - AMapSearch
+  - KVOMutableArray
   - Masonry
   - Reachability
+  - ReactiveCocoa (from `https://github.com/zhao0/ReactiveCocoa.git`, tag `2.5.2`)
   - Toast (~> 4.0.0)
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - AFNetworking
+    - AMap2DMap
+    - AMapFoundation
+    - AMapLocation
+    - AMapSearch
+    - KVOMutableArray
+    - Masonry
+    - Reachability
+    - Toast
+
+EXTERNAL SOURCES:
+  ReactiveCocoa:
+    :git: https://github.com/zhao0/ReactiveCocoa.git
+    :tag: 2.5.2
+
+CHECKOUT OPTIONS:
+  ReactiveCocoa:
+    :git: https://github.com/zhao0/ReactiveCocoa.git
+    :tag: 2.5.2
 
 SPEC CHECKSUMS:
   AFNetworking: b6f891fdfaed196b46c7a83cf209e09697b94057
+  AMap2DMap: cf0bfd6ae97951b55cc061903b814f924ba6c221
   AMapFoundation: 58f883c80754c659cf626deb3150936bfe8f1772
   AMapLocation: cf024b53dc03663efb4ea4bcce27d4cce58bb97a
   AMapSearch: 3dcbf85c403a2a0fe0eda5318caabc272b31f5e1
+  KVOMutableArray: 53f2b2722c4c6dc370d3db016c1515cc2ff17738
   Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
+  ReactiveCocoa: 3ff25b1bd992ac79c5c79b26b6c0c1713b715bb2
   Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
 
-PODFILE CHECKSUM: a3e96c65249d9558cca66586e73c0da13ac67ca0
+PODFILE CHECKSUM: 4d0e4ff8292a991381d02f553e1f1db7cc052eba
 
-COCOAPODS: 1.2.1
+COCOAPODS: 1.5.3

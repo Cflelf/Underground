@@ -7,9 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "HistoryLabel.h"
 
 @interface HistoryCollectionViewCell : UICollectionViewCell
 
-@property(nonatomic,strong)UILabel *label;
+@property(nonatomic,strong)HistoryLabel *label;
 
 @end

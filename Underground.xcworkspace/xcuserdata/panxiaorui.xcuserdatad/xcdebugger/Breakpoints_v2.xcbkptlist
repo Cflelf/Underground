@@ -6,16 +6,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "No"
+            shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Underground/View/HistoryCollectionViewCell.m"
-            timestampString = "557218950.549168"
+            filePath = "Underground/VC/GeoFenceViewController.m"
+            timestampString = "557844620.464471"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "131"
-            endingLineNumber = "131"
-            landmarkName = "-touchesEnded:withEvent:"
+            startingLineNumber = "139"
+            endingLineNumber = "139"
+            landmarkName = "-amapGeoFenceManager:didGeoFencesStatusChangedForRegion:customID:error:"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

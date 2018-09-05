@@ -49,4 +49,16 @@
     return currentVC;
 }
 
++ (NSData *)toJSONData:(id)theData{
+    
+    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:theData];
+    
+    return data;
+}
+
++ (id)toArrayOrNSDictionary:(NSData *)jsonData{
+    
+    return [NSKeyedUnarchiver unarchiveObjectWithData:jsonData]; 
+}
+    
 @end

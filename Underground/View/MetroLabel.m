@@ -21,10 +21,8 @@
 
 - (void)drawRect:(CGRect)rect{
     [super drawRect:rect];
-    self.backgroundColor = ThemeColor;
-    self.textColor = UIColor.whiteColor;
+    self.textColor = UIColor.blackColor;
     self.font = [UIFont systemFontOfSize:14];
-    self.layer.cornerRadius = 5;
 }
 
 @end

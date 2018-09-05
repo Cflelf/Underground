@@ -12,4 +12,8 @@
 
 + (UIViewController *)getCurrentVC;
 
++ (NSData *)toJSONData:(id)theData;
+
++ (id)toArrayOrNSDictionary:(NSData *)jsonData;
+
 @end

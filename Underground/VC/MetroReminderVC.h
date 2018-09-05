@@ -20,4 +20,8 @@ typedef enum _PlatformType{
 
 @property (nonatomic, assign) PlatformType type;
 
+@property (nonatomic,strong) UIButton *rubbishButton;
+
+- (void)deleteHistory:(NSString *)name;
+
 @end
