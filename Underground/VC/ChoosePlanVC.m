@@ -17,6 +17,7 @@
 #import <ReactiveCocoa/ReactiveCocoa.h>
 #import <KVOMutableArray/KVOMutableArray.h>
 #import "GeoFenceViewController.h"
+#import "Mission.h"
 
 #define ReuseSectionIdentifier @"planHeader"
 #define ReuseCellIdentifier @"plan"
@@ -61,6 +62,7 @@
     self.planTable.tableFooterView = [UIView new];
     self.planTable.delegate = self;
     self.planTable.dataSource = self;
+    self.planTable.allowsMultipleSelection = true;
     
     UIButton *button = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 44, 44)];
     [button setTitle:@"设置提醒" forState:UIControlStateNormal];
@@ -247,24 +249,26 @@
     PlanTableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
     
     if(!cell.chooseButton.isHidden){
-        if([self.selectedCells containsObject:cell]){
-            [[self mutableArrayValueForKey:ArrayKeyPath] removeObject:cell];
-        }else{
-            [[self mutableArrayValueForKey:ArrayKeyPath] addObject:cell];
-        }
-        [cell.chooseButton setSelected:!cell.chooseButton.selected];
+        [[self mutableArrayValueForKey:ArrayKeyPath] addObject:cell];
     }
+}
+
+- (void)tableView:(UITableView *)tableView didDeselectRowAtIndexPath:(NSIndexPath *)indexPath{
+    PlanTableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
     
-    [tableView deselectRowAtIndexPath:indexPath animated:true];
+    if(!cell.chooseButton.isHidden){
+        [[self mutableArrayValueForKey:ArrayKeyPath] removeObject:cell];
+    }
 }
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender{
     if ([segue.identifier isEqualToString:SegueIdentifer]) {
         GeoFenceViewController *vc = segue.destinationViewController;
-        vc.remindPFs = [NSMutableArray new];
+        vc.remindMissions = [NSMutableArray new];
         for (PlanTableViewCell *cell in self.selectedCells) {
-            [vc.remindPFs addObject:cell.stop];
+            [vc.remindMissions addObject:[[Mission alloc] initWithStop:cell.stop]];
         }
+        vc.plan = ((PlanTableHeaderView *)self.sectionArray[[self.currentSection intValue]*2]).plan;
     }
 }
 

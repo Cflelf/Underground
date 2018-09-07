@@ -60,5 +60,14 @@
     
     return [NSKeyedUnarchiver unarchiveObjectWithData:jsonData]; 
 }
+
++ (NSArray *)sortedDictionary:(NSDictionary *)dict{
+    
+    return [dict keysSortedByValueUsingComparator:^NSComparisonResult(id  _Nonnull obj1, id _Nonnull obj2) {
+        return ![obj1 compare:obj2];
+    }];
+    
+    
+}
     
 @end

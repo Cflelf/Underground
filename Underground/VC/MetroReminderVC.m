@@ -7,14 +7,22 @@
 //
 
 #import "MetroReminderVC.h"
-#import <AMapFoundationKit/AMapFoundationKit.h>
-#import <AMapSearchKit/AMapSearchKit.h>
 #import "UIView+Toast.h"
 #import "Const.h"
 #import "HistoryCollectionViewCell.h"
 #import "ChoosePlanVC.h"
+#import <ReactiveCocoa/ReactiveCocoa.h>
+#import <AMapFoundationKit/AMapFoundationKit.h>
+#import <AMapLocationKit/AMapLocationKit.h>
+#import <AMapSearchKit/AMapSearchKit.h>
+#import "APIKey.h"
+#import "ChooseLineVC.h"
+#import "Tools.h"
 
-@interface MetroReminderVC ()<UITextFieldDelegate,AMapSearchDelegate,UICollectionViewDelegate,UICollectionViewDataSource,UICollectionViewDelegateFlowLayout>
+#define DefaultLocationTimeout 5
+#define DefaultReGeocodeTimeout 5
+
+@interface MetroReminderVC ()<UITextFieldDelegate,AMapSearchDelegate,UICollectionViewDelegate,UICollectionViewDataSource,UICollectionViewDelegateFlowLayout,AMapLocationManagerDelegate,AMapSearchDelegate>
 
 @property(nonatomic,strong)AMapGeoPoint *startPoint;
 @property(nonatomic,strong)AMapGeoPoint *endPoint;
@@ -22,7 +30,18 @@
 @property(nonatomic,strong)AMapSearchAPI *search;
 @property (weak, nonatomic) IBOutlet UIView *historyView;
 @property (weak, nonatomic) IBOutlet UICollectionView *historyCollectionView;
-
+@property (weak, nonatomic) IBOutlet UIButton *remindButton;
+@property (weak, nonatomic) IBOutlet UIActivityIndicatorView *indicator;
+@property (nonatomic,assign) BOOL startRequest;
+@property (nonatomic, strong)AMapLocationManager *locationManager;
+@property (nonatomic, copy)AMapLocatingCompletionBlock completionBlock;
+@property (weak, nonatomic) IBOutlet UILabel *currentCityLabel;
+@property (nonatomic,strong)NSArray *sortedHistories;
+@property (weak, nonatomic) IBOutlet UIButton *changeButton;
+@property (weak, nonatomic) IBOutlet UIView *remindRadiusView;
+@property (weak, nonatomic) IBOutlet UILabel *remindRadiusLabel;
+@property (weak, nonatomic) IBOutlet UIImageView *locateIcon;
+@property (nonatomic, strong)NSMutableDictionary *metroInfoDic;
 @end
 
 @implementation MetroReminderVC
@@ -31,21 +50,35 @@
 
 - (void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
-    
     self.startPoint = nil;
     self.endPoint = nil;
     
-    if (HISTORYS && ((NSArray *)HISTORYS).count) {
-        [self.historyView setHidden:false];
-        [self.historyCollectionView reloadData];
-    }
+    self.sortedHistories = [Tools sortedDictionary:HISTORYS[CURRENT_CITY]];
+    [self.historyCollectionView reloadData];
+}
+
+- (void)initCurrentCity{
+    self.startRequest = true;
+    self.currentCityLabel.text = @"定位当前城市中...";
+    [self configLocationManager];
+    [self initCompleteBlock];
+    [self.locationManager requestLocationWithReGeocode:true completionBlock:self.completionBlock];
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    self.startRequest = false;
     self.startPF.delegate = self;
     self.endPF.delegate = self;
+    
+    [self initCurrentCity];
+    
+    if(RADIUS){
+        self.remindRadiusLabel.text = [NSString stringWithFormat:@"<%@米",[RADIUS stringValue] ];
+    }else{
+        [NSUserDefaults.standardUserDefaults setObject:[NSNumber numberWithInt:800] forKey:@"Radius"];
+    }
     
     self.search = [[AMapSearchAPI alloc] init];
     self.search.delegate = self;
@@ -58,6 +91,61 @@
     layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
     [self.historyCollectionView setCollectionViewLayout:layout animated:true];
     
+    @weakify(self)
+    [[RACSignal combineLatest:(@[RACObserve(self, startRequest),RACObserve(self, currentCityLabel.text),RACObserve(self, metroInfoDic)])] subscribeNext:^(RACTuple *tuple) {
+        @strongify(self)
+        if([tuple.first integerValue]){
+            [self.indicator startAnimating];
+        }else{
+            [self.indicator stopAnimating];
+        }
+        [self.locateIcon setUserInteractionEnabled:![tuple.first integerValue]];
+        BOOL b = [tuple.first integerValue] || ([tuple.second containsString:@"定位"] || !tuple.third);
+        [self.remindButton setBackgroundColor:b?[UIColor lightGrayColor]:ThemeColor];
+        [self.remindButton setUserInteractionEnabled:!b];
+        [self.startPF setUserInteractionEnabled:!b];
+        [self.endPF setUserInteractionEnabled:!b];
+        [self.historyCollectionView setUserInteractionEnabled:!b];
+        [self.changeButton setUserInteractionEnabled:!b];
+        [self.remindRadiusView setUserInteractionEnabled:!b];
+    }];
+    
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] init];
+    [tap.rac_gestureSignal subscribeNext:^(UITapGestureRecognizer *tap) {
+        [self initCurrentCity];
+    }];
+    [self.locateIcon addGestureRecognizer:tap];
+    
+    tap = [[UITapGestureRecognizer alloc] init];
+    [tap.rac_gestureSignal subscribeNext:^(UITapGestureRecognizer *tap) {
+        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"选择提醒范围"
+                                                                                 message:nil
+                                                                          preferredStyle:UIAlertControllerStyleActionSheet];
+        
+        UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil];
+        [alertController addAction:cancelAction];
+        
+        UIAlertAction *defaultAction = [UIAlertAction actionWithTitle:@"800(默认)" style:UIAlertActionStyleDefault handler:^(id x){
+            self.remindRadiusLabel.text = @"<800米(默认)";
+            [NSUserDefaults.standardUserDefaults setObject:[NSNumber numberWithInt:800] forKey:@"Radius"];
+        }];
+        [alertController addAction:defaultAction];
+        
+        UIAlertAction *thousandAction = [UIAlertAction actionWithTitle:@"1000" style:UIAlertActionStyleDefault handler:^(id x){
+            self.remindRadiusLabel.text = @"<1000米";
+            [NSUserDefaults.standardUserDefaults setObject:[NSNumber numberWithInt:1000] forKey:@"Radius"];
+        }];
+        [alertController addAction:thousandAction];
+        
+        UIAlertAction *largestAction = [UIAlertAction actionWithTitle:@"1500" style:UIAlertActionStyleDefault handler:^(id x){
+            self.remindRadiusLabel.text = @"<1500米";
+            [NSUserDefaults.standardUserDefaults setObject:[NSNumber numberWithInt:1500] forKey:@"Radius"];
+        }];
+        [alertController addAction:largestAction];
+        
+        [self presentViewController:alertController animated:YES completion:nil];
+    }];
+    [self.remindRadiusView addGestureRecognizer:tap];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -83,8 +171,7 @@
     HistoryCollectionViewCell *sizingCell = nil;
     sizingCell = [[HistoryCollectionViewCell alloc] init];
     
-    NSMutableArray *array = [[NSMutableArray alloc] initWithArray:HISTORYS];
-    sizingCell.label.text = array[indexPath.row];
+    sizingCell.label.text = self.sortedHistories[indexPath.row];
     [sizingCell.label sizeToFit];
     
     [sizingCell setNeedsLayout];
@@ -94,13 +181,13 @@
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section{
-    NSMutableArray *array = HISTORYS;
+    NSMutableArray *array = HISTORYS[CURRENT_CITY];
     return array ? array.count : 0;
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath{
     HistoryCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"History" forIndexPath:indexPath];
-    cell.label.text = HISTORYS[indexPath.row];
+    cell.label.text = self.sortedHistories[indexPath.row];
     [cell setNeedsLayout];
     [cell layoutIfNeeded];
     return cell;
@@ -114,7 +201,7 @@
 
 - (BOOL)textFieldShouldBeginEditing:(UITextField *)textField{
     self.type = textField == self.startPF ? 0:1;
-    [self performSegueWithIdentifier:@"ChooseLine" sender:nil];
+    [self performSegueWithIdentifier:@"chooseLine" sender:nil];
     return false;
 }
 
@@ -129,24 +216,25 @@
         [self.view showMyToast:@"起始站和终点站不能一致"];
         return;
     }
+    self.startRequest = true;
     
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
         dispatch_sync(dispatch_get_global_queue(0, 0), ^{
             AMapPOIKeywordsSearchRequest *request = [[AMapPOIKeywordsSearchRequest alloc] init];
-            request.city                = [NSUserDefaults.standardUserDefaults objectForKey:@"CurrentCity"];
+            request.city                = CURRENT_CITY;
             request.types               = @"地铁站";
             request.requireExtension    = YES;
             request.cityLimit           = YES;
-            request.keywords = [[[NSUserDefaults.standardUserDefaults objectForKey:@"CurrentCity"] stringByAppendingString:start] stringByAppendingString:@"(地铁站)"];
+            request.keywords = [[CURRENT_CITY stringByAppendingString:start] stringByAppendingString:@"(地铁站)"];
             [self.search AMapPOIKeywordsSearch:request];
         });
         dispatch_sync(dispatch_get_global_queue(0, 0), ^{
             AMapPOIKeywordsSearchRequest *request = [[AMapPOIKeywordsSearchRequest alloc] init];
-            request.city                = [NSUserDefaults.standardUserDefaults objectForKey:@"CurrentCity"];
+            request.city                = CURRENT_CITY;
             request.types               = @"地铁站";
             request.requireExtension    = YES;
             request.cityLimit           = YES;
-            request.keywords = [[[NSUserDefaults.standardUserDefaults objectForKey:@"CurrentCity"] stringByAppendingString:end] stringByAppendingString:@"(地铁站)"];
+            request.keywords = [[CURRENT_CITY stringByAppendingString:end] stringByAppendingString:@"(地铁站)"];
             [self.search AMapPOIKeywordsSearch:request];
         });
     });
@@ -171,42 +259,70 @@
         }
         
     }else{
+        self.startRequest = false;
         [self.view showMyToast:@"查找位置失败"];
     }
 }
 
 
 - (void)onRouteSearchDone:(AMapRouteSearchBaseRequest *)request response:(AMapRouteSearchResponse *)response{
+    self.startRequest = false;
     if (response && response.route.transits.count > 0 && response.route.transits[0].segments.count > 0) {
-        if (HISTORYS) {
-            NSMutableArray *array = [[NSMutableArray alloc] initWithArray:HISTORYS];
-            
-            if(![array containsObject:self.startPF.text]){
-                [array addObject:self.startPF.text];
-            }
-            
-            if(![array containsObject:self.endPF.text]){
-                [array addObject:self.endPF.text];
-            }
-            
-            [NSUserDefaults.standardUserDefaults setObject:array forKey:@"History"];
-        }else{
-            NSMutableArray *array = [[NSMutableArray alloc] initWithObjects:self.startPF.text,self.endPF.text,nil];
-            [NSUserDefaults.standardUserDefaults setObject:array forKey:@"History"];
-        }
+        
+        [self saveHistory];
         
         [self performSegueWithIdentifier:@"choosePlan" sender:response.route];
     }
 }
 
-- (void)deleteHistory:(NSString *)name{
-    NSMutableArray *array = [[NSMutableArray alloc] initWithArray:HISTORYS];
+- (void)saveHistory{
+    NSMutableDictionary *dic;
+    NSMutableDictionary *cityDic;
+    //如果存储过历史
+    if (HISTORYS) {
+        dic = [[NSMutableDictionary alloc] initWithDictionary:HISTORYS];
+        //如果已存在城市记录
+        if([dic objectForKey:self.currentCityLabel.text]){
+            cityDic = [NSMutableDictionary dictionaryWithDictionary:[dic objectForKey:self.currentCityLabel.text]];
+            //如果已存在站点记录，直接在数量上加一
+            if ([cityDic objectForKey:self.startPF.text]) {
+                [cityDic setObject:[NSNumber numberWithInt:([[cityDic objectForKey:self.startPF.text] intValue] + 1)] forKey:self.startPF.text];
+            }else{
+                [cityDic setObject:[NSNumber numberWithInt:1] forKey:self.startPF.text];
+            }
+            
+            if ([cityDic objectForKey:self.endPF.text]) {
+                [cityDic setObject:[NSNumber numberWithInt:([[cityDic objectForKey:self.endPF.text] intValue] + 1)] forKey:self.endPF.text];
+            }else{
+                [cityDic setObject:[NSNumber numberWithInt:1] forKey:self.endPF.text];
+            }
+        }else{
+            cityDic = [[NSMutableDictionary alloc] init];
+            [cityDic setObject:[NSNumber numberWithInt:1] forKey:self.startPF.text];
+            [cityDic setObject:[NSNumber numberWithInt:1] forKey:self.endPF.text];
+        }
+    }else{
+        dic = [[NSMutableDictionary alloc] initWithDictionary:HISTORYS];
+        cityDic = [[NSMutableDictionary alloc] init];
+        [cityDic setObject:[NSNumber numberWithInt:1] forKey:self.startPF.text];
+        [cityDic setObject:[NSNumber numberWithInt:1] forKey:self.endPF.text];
+    }
+    [dic setObject:cityDic forKey:CURRENT_CITY];
     
-    if ([array containsObject:name]) {
-        [array removeObject:name];
+    [NSUserDefaults.standardUserDefaults setObject:dic forKey:@"History"];
+}
+
+- (void)deleteHistory:(NSString *)name{
+    NSMutableDictionary *dic = [NSMutableDictionary dictionaryWithDictionary:HISTORYS];
+    
+    if ([dic objectForKey:CURRENT_CITY]) {
+        NSMutableDictionary *cityDic = [NSMutableDictionary dictionaryWithDictionary:HISTORYS[CURRENT_CITY]];
+        [cityDic removeObjectForKey:name];
+        [dic setObject:cityDic forKey:CURRENT_CITY];
     }
     
-    [NSUserDefaults.standardUserDefaults setObject:array forKey:@"History"];
+    [NSUserDefaults.standardUserDefaults setObject:dic forKey:@"History"];
+    self.sortedHistories = [Tools sortedDictionary:HISTORYS[CURRENT_CITY]];
     [self.historyCollectionView reloadData];
 }
 
@@ -214,11 +330,63 @@
     if ([segue.identifier isEqualToString:@"choosePlan"]) {
         ChoosePlanVC *vc = segue.destinationViewController;
         vc.route = sender;
+    }else if([segue.identifier isEqualToString:@"chooseLine"]){
+        ChooseLineVC *vc = segue.destinationViewController;
+        vc.metroInfoDic = self.metroInfoDic;
     }
 }
 
 - (void)AMapSearchRequest:(id)request didFailWithError:(NSError *)error{
     NSLog(@"Error: %@", error);
+}
+
+- (void)initCompleteBlock{
+    __weak MetroReminderVC *weakSelf = self;
+    self.completionBlock = ^(CLLocation *location, AMapLocationReGeocode *regeocode, NSError *error){
+        if (error){
+            weakSelf.startRequest = false;
+            weakSelf.currentCityLabel.text = @"定位错误,请重新定位";
+            return;
+        }
+        weakSelf.search = [[AMapSearchAPI alloc] init];
+        weakSelf.search.delegate = weakSelf;
+        AMapReGeocodeSearchRequest *regeo = [[AMapReGeocodeSearchRequest alloc] init];
+        regeo.location = [AMapGeoPoint locationWithLatitude:location.coordinate.latitude longitude:location.coordinate.longitude];
+        regeo.requireExtension = YES;
+        [weakSelf.search AMapReGoecodeSearch:regeo];
+    };
+}
+
+/* 逆地理编码回调. */
+- (void)onReGeocodeSearchDone:(AMapReGeocodeSearchRequest *)request response:(AMapReGeocodeSearchResponse *)response{
+    if (response.regeocode != nil){
+        NSLog(@"%@",response.regeocode.addressComponent);
+        
+        NSString *city = response.regeocode.addressComponent.city;
+        self.startRequest = false;
+        self.currentCityLabel.text = city;
+        [[NSUserDefaults standardUserDefaults] setObject:city forKey:@"CurrentCity"];
+        
+        for (NSString* key in ALL_METRO_DIC.allKeys) {
+            if([key containsString:CURRENT_CITY]||[CURRENT_CITY containsString:key]){
+                self.metroInfoDic = [ALL_METRO_DIC objectForKey:key];
+                self.sortedHistories = [Tools sortedDictionary:HISTORYS[CURRENT_CITY]];
+                [self.historyCollectionView reloadData];
+                return;
+            }
+        }
+        [self.view showMyToast:@"当前城市暂未开通地铁"];
+    }
+}
+
+- (void)configLocationManager{
+    self.locationManager = [[AMapLocationManager alloc] init];
+    [self.locationManager setDelegate:self];
+    [self.locationManager setDesiredAccuracy:kCLLocationAccuracyHundredMeters];
+    [self.locationManager setPausesLocationUpdatesAutomatically:NO];
+    [self.locationManager setAllowsBackgroundLocationUpdates:NO];
+    [self.locationManager setLocationTimeout:DefaultLocationTimeout];
+    [self.locationManager setReGeocodeTimeout:DefaultReGeocodeTimeout];
 }
 /*
 #pragma mark - Navigation

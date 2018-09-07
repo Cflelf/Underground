@@ -16,4 +16,6 @@
 
 + (id)toArrayOrNSDictionary:(NSData *)jsonData;
 
++ (NSArray *)sortedDictionary:(NSDictionary *)dict;
+
 @end

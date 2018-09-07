@@ -10,6 +10,7 @@
 
 @interface ChooseLineVC : UIViewController
 
+@property (nonatomic, strong)NSMutableDictionary *metroInfoDic;
 
 @end
 

@@ -18,38 +18,40 @@
 #import "Const.h"
 #import <ReactiveCocoa/ReactiveCocoa.h>
 #import "Tools.h"
+#import "UIViewController+BackButtonHandler.h"
 
-@interface GeoFenceViewController ()<AMapGeoFenceManagerDelegate,MAMapViewDelegate, AMapLocationManagerDelegate>
+@interface GeoFenceViewController ()<AMapGeoFenceManagerDelegate,MAMapViewDelegate, AMapLocationManagerDelegate,BackButtonHandlerProtocol,UIGestureRecognizerDelegate>
 @property (nonatomic, strong) AMapLocationManager *locationManager;
 @property (nonatomic,strong) AMapGeoFenceManager *geoFenceManager;
 @property (weak, nonatomic) IBOutlet MAMapView *mapView;
 @property (nonatomic,assign) Boolean enterBackground;
-@property (nonatomic,assign) Boolean missionComplete;
+@property (weak, nonatomic) IBOutlet UIImageView *metroImage;
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *trailingConstraint;
+@property (weak, nonatomic) IBOutlet UIButton *saveButton;
+
 @end
 
 @implementation GeoFenceViewController
 
 - (void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
-    [self.tabBarController.tabBar setHidden:true];
+    [self.metroImage setHidden:false];
 }
 
 - (void)viewWillDisappear:(BOOL)animated{
     [super viewWillDisappear:animated];
-    [self.tabBarController.tabBar setHidden:false];
+    [self.metroImage setHidden:true];
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     self.title = @"行驶中";
-    self.missionComplete = false;
     [AMapServices sharedServices].enableHTTPS = true;
     
     self.mapView.delegate = self;
     self.mapView.showsUserLocation = true;
     self.mapView.userTrackingMode = MAUserTrackingModeFollow;
-    [self.mapView setZoomLevel:12 animated:false];
     
     self.geoFenceManager = [[AMapGeoFenceManager alloc] init];
     self.geoFenceManager.delegate = self;
@@ -57,9 +59,9 @@
     self.geoFenceManager.allowsBackgroundLocationUpdates = true;  //允许后台定位
     
     //创建地理围栏
-    for(AMapBusStop *stop in self.remindPFs){
-        CLLocationCoordinate2D coordinate = CLLocationCoordinate2DMake(stop.location.latitude, stop.location.longitude);
-        [self.geoFenceManager addCircleRegionForMonitoringWithCenter:coordinate radius:300 customID:stop.name];
+    for(Mission *mission in self.remindMissions){
+        CLLocationCoordinate2D coordinate = CLLocationCoordinate2DMake(mission.stop.location.latitude, mission.stop.location.longitude);
+        [self.geoFenceManager addCircleRegionForMonitoringWithCenter:coordinate radius:[RADIUS doubleValue] customID:mission.stop.name];
     }
     
     [self configLocationManager];
@@ -79,6 +81,9 @@
      subscribeNext:^(NSNotification *notification) {
          @strongify(self)
          self.enterBackground = false;
+         if(![self checkAllMissionComplete]){
+             [self MetroAnimate];
+         }
      }];
     
     [self saveInfo];
@@ -88,31 +93,59 @@
 - (void)viewDidAppear:(BOOL)animated{
     [super viewDidAppear:animated];
     [self.locationManager startUpdatingLocation];
+    
+    [self MetroAnimate];
+    
+    if([self.navigationController respondsToSelector:@selector(interactivePopGestureRecognizer)]) {
+        self.navigationController.interactivePopGestureRecognizer.delegate = self;
+    }
 }
+
+- (void)viewDidDisappear:(BOOL)animated{
+    [super viewDidDisappear:animated];
+    
+    if([self.navigationController respondsToSelector:@selector(interactivePopGestureRecognizer)]) {
+        self.navigationController.interactivePopGestureRecognizer.delegate = nil;
+    }
+}
+
+- (void)MetroAnimate{
+    [UIView animateWithDuration:3 delay:0.5 options: UIViewAnimationOptionCurveEaseIn animations:^{
+        self.trailingConstraint.constant += ScreenWidth*4.8/5;
+        [self.metroImage.superview layoutIfNeeded];
+    } completion:^(BOOL b){
+        if (![self checkAllMissionComplete]) {
+            [UIView animateWithDuration:3 delay:2 options:UIViewAnimationOptionCurveEaseIn animations:^{
+                self.trailingConstraint.constant += 1500 - ScreenWidth*4.8/5;
+                [self.metroImage.superview layoutIfNeeded];
+            } completion:^(BOOL finished) {
+                if(finished && ![self checkAllMissionComplete]){
+                    self.trailingConstraint.constant = 0;
+                    [self.metroImage.superview layoutIfNeeded];
+                    [self MetroAnimate];
+                }
+            }];
+        }
+    }];
+}
+
+
 
 - (void)configLocationManager{
     self.locationManager = [[AMapLocationManager alloc] init];
-    
     [self.locationManager setDelegate:self];
-    
-    //设置不允许系统暂停定位
     [self.locationManager setPausesLocationUpdatesAutomatically:NO];
-    
-    //设置允许在后台定位
     [self.locationManager setAllowsBackgroundLocationUpdates:YES];
-    
-    //设置允许连续定位逆地理
     [self.locationManager setLocatingWithReGeocode:YES];
 }
 
-- (MAOverlayRenderer *)mapView:(MAMapView *)mapView rendererForOverlay:(id <MAOverlay>)overlay
-{
+- (MAOverlayRenderer *)mapView:(MAMapView *)mapView rendererForOverlay:(id <MAOverlay>)overlay{
     if ([overlay isKindOfClass:[MACircle class]])
     {
         MACircleRenderer *circleRenderer = [[MACircleRenderer alloc] initWithCircle:overlay];
         circleRenderer.lineWidth = 2.0f;
         circleRenderer.strokeColor = ThemeColor;
-        circleRenderer.fillColor = ThemeColor;
+        circleRenderer.fillColor = [UIColor redColor];
         circleRenderer.alpha = 0.5;
         return circleRenderer;
     }
@@ -122,7 +155,7 @@
 - (void)amapGeoFenceManager:(AMapGeoFenceManager *)manager didAddRegionForMonitoringFinished:(NSArray<AMapGeoFenceRegion *> *)regions customID:(NSString *)customID error:(NSError *)error{
     AMapGeoFenceCircleRegion *circleRegion = (AMapGeoFenceCircleRegion *)regions.firstObject;
     //构造圆
-    MACircle *circle = [MACircle circleWithCenterCoordinate:circleRegion.center radius:500];
+    MACircle *circle = [MACircle circleWithCenterCoordinate:circleRegion.center radius:[RADIUS doubleValue]];
     //在地图上添加圆
     [self.mapView addOverlay:circle];
 }
@@ -131,13 +164,14 @@
     if (error) {
         NSLog(@"status changed error %@",error);
     }else{
-        if(region.fenceStatus == AMapGeoFenceRegionStatusInside){
+        if(region.fenceStatus == AMapGeoFenceRegionStatusInside && ![self getMission:customID].completed){
             [AppDelegate registerNotification:1 title:@"到站提醒!" body:[NSString stringWithFormat:@"%@快到了，赶紧下车啦",customID]];
-        }
-        
-        if ([customID isEqualToString:((AMapBusStop *)self.remindPFs.firstObject).name]) {
-            self.missionComplete = true;
-            [self saveInfo];
+            [self getMission:customID].completed = true;
+            [manager removeGeoFenceRegionsWithCustomID:customID];
+            
+            if([self checkAllMissionComplete]){
+                [self.locationManager stopUpdatingLocation];
+            }
         }
     }
 }
@@ -151,13 +185,55 @@
     if(!self.enterBackground){
         [self.mapView setCenterCoordinate:userLocation.coordinate];
     }
-    
 }
 
 - (void)saveInfo{
-    [[NSUserDefaults standardUserDefaults] setBool:self.missionComplete forKey:@"missonComplete"];
-    [[NSUserDefaults standardUserDefaults] setObject:[Tools toJSONData:self.remindPFs] forKey:@"remindPFS"];
+    [[NSUserDefaults standardUserDefaults] setBool:[self checkAllMissionComplete] forKey:@"missonComplete"];
+    [[NSUserDefaults standardUserDefaults] setObject:[Tools toJSONData:self.remindMissions] forKey:@"remindMissions"];
 }
+
+- (Mission *)getMission:(NSString *)name{
+    for (Mission *mission in self.remindMissions) {
+        if ([mission.stop.name isEqualToString:name]) {
+            return mission;
+        }
+    }
+    return nil;
+}
+
+- (Boolean)checkAllMissionComplete{
+    for (Mission *mission in self.remindMissions) {
+        if (!mission.completed) {
+            return false;
+        }
+    }
+    self.title = @"当前行程已完成";
+    return true;
+}
+
+- (BOOL)navigationShouldPopOnBackButton{
+    if(![self checkAllMissionComplete]){
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"提示" message:@"这次行程还未完成,你确定要离开吗" preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil];
+        UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [self.navigationController popViewControllerAnimated:true];
+        }];
+        
+        [alert addAction:cancelAction];
+        [alert addAction:okAction];
+        [self presentViewController:alert animated:true completion:nil];
+        return false;
+    }else{
+        return true;
+    }
+}
+
+- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer{
+    return [self checkAllMissionComplete];
+}
+
+
+
 
 
 

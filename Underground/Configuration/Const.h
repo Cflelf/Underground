@@ -29,7 +29,7 @@
 #define ALL_METRO_DIC [[NSDictionary alloc] initWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"MetroInfo" ofType:@"plist"]]
 
 #define HISTORYS [NSUserDefaults.standardUserDefaults objectForKey:@"History"]
-
-
+#define CURRENT_CITY [NSUserDefaults.standardUserDefaults objectForKey:@"CurrentCity"]
+#define RADIUS [NSUserDefaults.standardUserDefaults objectForKey:@"Radius"]
 
 #endif /* Const_h */

@@ -45,8 +45,8 @@
     }];
     
 //    if([[NSUserDefaults standardUserDefaults] boolForKey:@"missionComplete"]){
-        id x = [Tools toArrayOrNSDictionary:[[NSUserDefaults standardUserDefaults] dataForKey:@"remindPFS"]];
-        
+        id x = [Tools toArrayOrNSDictionary:[[NSUserDefaults standardUserDefaults] dataForKey:@"remindMissions"]];
+    
 //    }
     return YES;
 }
@@ -111,7 +111,6 @@
 
 - (void)applicationWillTerminate:(UIApplication *)application {
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
-    [AppDelegate registerNotification:1 title:@"要被系统kill啦" body:@"再打开一次"];
 }
 
 

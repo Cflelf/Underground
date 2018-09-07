@@ -7,9 +7,12 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "Mission.h"
+#import "Plan.h"
 
 @interface GeoFenceViewController : UIViewController
 
-@property(nonatomic,strong)NSMutableArray *remindPFs;
+@property(nonatomic,strong)NSMutableArray *remindMissions;
+@property(nonatomic,strong)Plan *plan;
 
 @end
