@@ -43,11 +43,7 @@
     [center getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings * _Nonnull settings) {
         
     }];
-    
-//    if([[NSUserDefaults standardUserDefaults] boolForKey:@"missionComplete"]){
-        id x = [Tools toArrayOrNSDictionary:[[NSUserDefaults standardUserDefaults] dataForKey:@"remindMissions"]];
-    
-//    }
+
     return YES;
 }
 

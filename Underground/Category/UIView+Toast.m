@@ -17,7 +17,7 @@
     CSToastStyle *style = [[CSToastStyle alloc] initWithDefaultStyle];
     style.backgroundColor = ThemeColor;
     style.messageColor = UIColor.whiteColor;
-    [self makeToast:str duration:1 position:CSToastPositionCenter style:style];
+    [self makeToast:str duration:1 position:CSToastPositionBottom style:style];
 }
 
 @end

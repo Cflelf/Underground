@@ -41,6 +41,7 @@
 @property (weak, nonatomic) IBOutlet UIView *remindRadiusView;
 @property (weak, nonatomic) IBOutlet UILabel *remindRadiusLabel;
 @property (weak, nonatomic) IBOutlet UIImageView *locateIcon;
+@property (weak, nonatomic) IBOutlet UILabel *remindWords;
 @property (nonatomic, strong)NSMutableDictionary *metroInfoDic;
 @end
 
@@ -371,6 +372,10 @@
             if([key containsString:CURRENT_CITY]||[CURRENT_CITY containsString:key]){
                 self.metroInfoDic = [ALL_METRO_DIC objectForKey:key];
                 self.sortedHistories = [Tools sortedDictionary:HISTORYS[CURRENT_CITY]];
+                if(self.sortedHistories.count >= 2){
+                    self.startPF.text = self.sortedHistories[0];
+                    self.endPF.text = self.sortedHistories[1];
+                }
                 [self.historyCollectionView reloadData];
                 return;
             }

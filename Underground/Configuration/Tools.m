@@ -64,7 +64,9 @@
 + (NSArray *)sortedDictionary:(NSDictionary *)dict{
     
     return [dict keysSortedByValueUsingComparator:^NSComparisonResult(id  _Nonnull obj1, id _Nonnull obj2) {
-        return ![obj1 compare:obj2];
+        NSNumber *n1 = obj1;
+        NSNumber *n2 = obj2;
+        return [n2 compare:n1];
     }];
     
     
