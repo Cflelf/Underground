@@ -14,7 +14,7 @@ typedef void(^openBlock)(NSInteger section);
 typedef void(^closeBlock)(NSInteger section);
 
 @interface PlanTableHeaderView : UITableViewHeaderFooterView
-@property (strong, nonatomic) UIImageView *downArrowButton;
+@property (strong, nonatomic) UIImageView *downArrowImage;
 @property (strong, nonatomic) UILabel *planInfoLabel;
 @property (strong, nonatomic) UIButton *chooseButton;
 @property (strong, nonatomic) UIStackView *stackView;

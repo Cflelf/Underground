@@ -82,7 +82,7 @@
         <!--Choose PlanVC-->
         <scene sceneID="h66-VK-vqa">
             <objects>
-                <viewController id="yK7-y9-pID" customClass="ChoosePlanVC" sceneMemberID="viewController">
+                <viewController automaticallyAdjustsScrollViewInsets="NO" id="yK7-y9-pID" customClass="ChoosePlanVC" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="wgc-ax-Ra3">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -158,7 +158,7 @@
         <!--Geo Fence View Controller-->
         <scene sceneID="IWS-aM-X0b">
             <objects>
-                <viewController id="hab-cF-0wa" customClass="GeoFenceViewController" sceneMemberID="viewController">
+                <viewController automaticallyAdjustsScrollViewInsets="NO" id="hab-cF-0wa" customClass="GeoFenceViewController" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="rcz-3d-hfc">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -255,13 +255,30 @@
                                             </tableViewCell>
                                         </prototypes>
                                     </tableView>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="您的行程---------已完成" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="n4n-MW-576">
+                                        <rect key="frame" x="87.5" y="265.5" width="200" height="20.5"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="200" id="938-8G-7t3"/>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Bjj-bL-aGS">
+                                        <rect key="frame" x="164" y="274" width="46" height="30"/>
+                                        <state key="normal" title="Button"/>
+                                    </button>
                                 </subviews>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
+                                    <constraint firstItem="n4n-MW-576" firstAttribute="centerY" secondItem="uqY-R8-Y3a" secondAttribute="centerY" id="7p8-rS-MM6"/>
                                     <constraint firstItem="RdW-RI-Paz" firstAttribute="leading" secondItem="uqY-R8-Y3a" secondAttribute="leading" id="Q89-8w-OGi"/>
+                                    <constraint firstItem="n4n-MW-576" firstAttribute="centerX" secondItem="uqY-R8-Y3a" secondAttribute="centerX" id="V03-7F-fyS"/>
+                                    <constraint firstItem="n4n-MW-576" firstAttribute="bottom" secondItem="Bjj-bL-aGS" secondAttribute="top" constant="12" id="Ypq-mv-f3J"/>
                                     <constraint firstAttribute="trailing" secondItem="RdW-RI-Paz" secondAttribute="trailing" id="cBt-9f-5lc"/>
                                     <constraint firstItem="RdW-RI-Paz" firstAttribute="top" secondItem="uqY-R8-Y3a" secondAttribute="top" id="f6E-5u-0dO"/>
                                     <constraint firstAttribute="bottom" secondItem="RdW-RI-Paz" secondAttribute="bottom" id="mTi-jh-ngC"/>
+                                    <constraint firstItem="Bjj-bL-aGS" firstAttribute="centerX" secondItem="uqY-R8-Y3a" secondAttribute="centerX" id="s2c-Mk-2HR"/>
                                 </constraints>
                             </view>
                         </subviews>
@@ -501,7 +518,7 @@
         <!--选择线路-->
         <scene sceneID="lV7-du-WE0">
             <objects>
-                <viewController title="选择线路" id="P2a-if-62z" customClass="ChooseLineVC" sceneMemberID="viewController">
+                <viewController title="选择线路" automaticallyAdjustsScrollViewInsets="NO" id="P2a-if-62z" customClass="ChooseLineVC" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="dq9-02-UhY">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -529,12 +546,12 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="jAg-nY-57q" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2041" y="-494"/>
+            <point key="canvasLocation" x="2026" y="-119"/>
         </scene>
         <!--Choose PlatformVC-->
         <scene sceneID="OHC-mq-z1v">
             <objects>
-                <viewController id="yI8-a9-FJ6" customClass="ChoosePlatformVC" sceneMemberID="viewController">
+                <viewController automaticallyAdjustsScrollViewInsets="NO" id="yI8-a9-FJ6" customClass="ChoosePlatformVC" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="0cl-Rb-rDS">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

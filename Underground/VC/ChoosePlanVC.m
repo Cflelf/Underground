@@ -133,25 +133,24 @@
         Plan *plan = self.plans[j];
         PlanTableHeaderView *header = [self.planTable dequeueReusableHeaderFooterViewWithIdentifier:ReuseSectionIdentifier];
         header.plan = plan;
-        if(header == nil){
-            header = [[PlanTableHeaderView alloc] initWithReuseIdentifier:ReuseSectionIdentifier];
-        }
         
-        __weak typeof(self) weakself = self;
+        @weakify(self)
         header.openblock =^(NSInteger section){
-            if(weakself.currentSection && [weakself.currentSection integerValue] != section){
-                [weakself closeSection:[weakself.currentSection integerValue]];
+            @strongify(self)
+            if(self.currentSection && [self.currentSection integerValue] != section){
+                [self closeSection:[self.currentSection integerValue]];
             }
-            weakself.currentSection = [NSNumber numberWithInteger:section] ;
-            [weakself openSection:section];
+            self.currentSection = [NSNumber numberWithInteger:section] ;
+            [self openSection:section];
         };
         header.closeblock = ^(NSInteger section){
-            if (weakself.currentSection && [weakself.currentSection integerValue] == section) {
-                weakself.currentSection = nil;
-                [weakself closeSection:section];
+            @strongify(self)
+            if (self.currentSection && [self.currentSection integerValue] == section) {
+                self.currentSection = nil;
+                [self closeSection:section];
                 [self.planTable scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:NSNotFound inSection:section] atScrollPosition:UITableViewScrollPositionTop animated:true];
             }else{
-                [weakself closeSection:section];
+                [self closeSection:section];
             }
         };
         header.section = j;
@@ -190,7 +189,13 @@
 }
 
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
-    return self.sectionArray[section*2];
+    PlanTableHeaderView *view = self.sectionArray[section*2];
+    
+    if(!view.plan.isOpen){
+        [view.downArrowImage setHighlighted:false];
+    }
+    
+    return view;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{

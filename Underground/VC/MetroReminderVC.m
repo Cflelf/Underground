@@ -56,6 +56,12 @@
     
     self.sortedHistories = [Tools sortedDictionary:HISTORYS[CURRENT_CITY]];
     [self.historyCollectionView reloadData];
+    
+    if(self.sortedHistories.count > 0){
+        [self.remindWords setHidden:false];
+    }else{
+        [self.remindWords setHidden:true];
+    }
 }
 
 - (void)initCurrentCity{
@@ -116,6 +122,8 @@
         [self initCurrentCity];
     }];
     [self.locateIcon addGestureRecognizer:tap];
+    [self.currentCityLabel setUserInteractionEnabled:true];
+    [self.currentCityLabel addGestureRecognizer:tap];
     
     tap = [[UITapGestureRecognizer alloc] init];
     [tap.rac_gestureSignal subscribeNext:^(UITapGestureRecognizer *tap) {

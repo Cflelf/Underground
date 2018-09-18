@@ -260,8 +260,15 @@
             return false;
         }
     }
-    self.title = @"当前行程已完成";
+    
+    [self updateToFinishView];
     return true;
+}
+
+- (void)updateToFinishView{
+    self.title = @"当前行程已完成";
+    
+    
 }
 
 - (BOOL)navigationShouldPopOnBackButton{

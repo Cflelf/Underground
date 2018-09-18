@@ -51,10 +51,11 @@
         
         [self addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapOpen)]];
         
-        self.downArrowButton = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"down_arrow"]];
-        [self addSubview:self.downArrowButton];
+        self.downArrowImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"down_arrow"]];
+        [self.downArrowImage setHighlightedImage:[UIImage imageNamed:@"up_arrow"]];
+        [self addSubview:self.downArrowImage];
         
-        [self.downArrowButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        [self.downArrowImage mas_makeConstraints:^(MASConstraintMaker *make) {
             make.trailing.equalTo(@(-8));
             make.centerY.equalTo(@0);
         }];
@@ -65,10 +66,10 @@
 - (void)tapOpen{
     if (self.plan.isOpen) {
         self.closeblock(self.section);
-        [self.downArrowButton setImage:[UIImage imageNamed:@"down_arrow"]];
+        [self.downArrowImage setHighlighted:false];
     }else{
         self.openblock(self.section);
-        [self.downArrowButton setImage:[UIImage imageNamed:@"up_arrow"]];
+        [self.downArrowImage setHighlighted:true];
     }
 }
 
