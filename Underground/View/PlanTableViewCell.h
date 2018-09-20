@@ -26,7 +26,8 @@ typedef enum _MetroPFType{
 @property (weak, nonatomic) IBOutlet UILabel *subTitle;
 @property (strong,nonatomic) MetroPFTypeLabel *typeLabel;
 @property (weak, nonatomic) IBOutlet UIImageView *metroImage;
-@property (strong,nonatomic) AMapBusStop *stop;
+@property (strong,nonatomic) MyBusStop *stop;
 @property (weak, nonatomic) IBOutlet UIImageView *finishImage;
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *constraint;
+@property (weak, nonatomic) IBOutlet UILabel *timeLabel;
 @end

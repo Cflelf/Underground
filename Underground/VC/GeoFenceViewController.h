@@ -10,9 +10,17 @@
 #import "Mission.h"
 #import "Plan.h"
 
+@interface TripInfo : NSObject
+
+@property(nonatomic,strong)NSMutableArray *remindMissions;
+@property(nonatomic,strong)Plan *plan;
+
+@end
+
 @interface GeoFenceViewController : UIViewController
 
 @property(nonatomic,strong)NSMutableArray *remindMissions;
 @property(nonatomic,strong)Plan *plan;
+@property(nonatomic,strong)NSDate *startDate;
 
 @end

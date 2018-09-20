@@ -18,11 +18,12 @@
 #import "APIKey.h"
 #import "ChooseLineVC.h"
 #import "Tools.h"
+#import "GeoFenceViewController.h"
 
 #define DefaultLocationTimeout 5
 #define DefaultReGeocodeTimeout 5
 
-@interface MetroReminderVC ()<UITextFieldDelegate,AMapSearchDelegate,UICollectionViewDelegate,UICollectionViewDataSource,UICollectionViewDelegateFlowLayout,AMapLocationManagerDelegate,AMapSearchDelegate>
+@interface MetroReminderVC ()<UITextFieldDelegate,AMapSearchDelegate,UICollectionViewDelegate,UICollectionViewDataSource,UICollectionViewDelegateFlowLayout,AMapLocationManagerDelegate,AMapSearchDelegate,UITableViewDelegate,UITableViewDataSource>
 
 @property(nonatomic,strong)AMapGeoPoint *startPoint;
 @property(nonatomic,strong)AMapGeoPoint *endPoint;
@@ -43,6 +44,8 @@
 @property (weak, nonatomic) IBOutlet UIImageView *locateIcon;
 @property (weak, nonatomic) IBOutlet UILabel *remindWords;
 @property (nonatomic, strong)NSMutableDictionary *metroInfoDic;
+@property (weak, nonatomic) IBOutlet UITableView *savedTripTable;
+@property (nonatomic,strong) NSMutableDictionary *savedTrips;
 @end
 
 @implementation MetroReminderVC
@@ -58,10 +61,23 @@
     [self.historyCollectionView reloadData];
     
     if(self.sortedHistories.count > 0){
-        [self.remindWords setHidden:false];
+        if([NSUserDefaults.standardUserDefaults boolForKey:@"everShowRemindWords"]){
+            [self.remindWords setHidden:true];
+        }else{
+            [self.remindWords setHidden:false];
+            [NSUserDefaults.standardUserDefaults setBool:true forKey:@"everShowRemindWords"];
+        }
     }else{
         [self.remindWords setHidden:true];
     }
+    
+    self.savedTrips = [Tools toArrayOrNSDictionary:[NSUserDefaults.standardUserDefaults objectForKey:@"savedTrip"]];
+    if (!self.savedTrips) {
+        [self.savedTripTable setHidden:true];
+    }else{
+        [self.savedTripTable setHidden:false];
+    }
+    [self.savedTripTable reloadData];
 }
 
 - (void)initCurrentCity{
@@ -86,6 +102,10 @@
     }else{
         [NSUserDefaults.standardUserDefaults setObject:[NSNumber numberWithInt:800] forKey:@"Radius"];
     }
+    
+    self.savedTripTable.delegate = self;
+    self.savedTripTable.dataSource = self;
+    self.savedTripTable.tableFooterView = [UIView new];
     
     self.search = [[AMapSearchAPI alloc] init];
     self.search.delegate = self;
@@ -115,6 +135,7 @@
         [self.historyCollectionView setUserInteractionEnabled:!b];
         [self.changeButton setUserInteractionEnabled:!b];
         [self.remindRadiusView setUserInteractionEnabled:!b];
+        [self.savedTripTable setUserInteractionEnabled:![tuple.first integerValue]];
     }];
     
     UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] init];
@@ -181,10 +202,11 @@
     sizingCell = [[HistoryCollectionViewCell alloc] init];
     
     sizingCell.label.text = self.sortedHistories[indexPath.row];
-    [sizingCell.label sizeToFit];
     
     [sizingCell setNeedsLayout];
     [sizingCell layoutIfNeeded];
+    [sizingCell.label sizeToFit];
+    
     CGSize cellSize = CGSizeMake(sizingCell.label.frame.size.width+12, 30);
     return cellSize;
 }
@@ -219,10 +241,10 @@
     NSString *end = self.endPF.text;
     
     if (start.length == 0 || end.length == 0) {
-        [self.view showMyToast:@"请填写完整"];
+        [self.view showMyToast:@"请填写完整" position:@"CSToastPositionCenter"];
         return;
     }else if([start isEqualToString:end]){
-        [self.view showMyToast:@"起始站和终点站不能一致"];
+        [self.view showMyToast:@"起始站和终点站不能一致" position:@"CSToastPositionCenter"];
         return;
     }
     self.startRequest = true;
@@ -269,7 +291,7 @@
         
     }else{
         self.startRequest = false;
-        [self.view showMyToast:@"查找位置失败"];
+        [self.view showMyToast:@"查找位置失败" position:@"CSToastPositionCenter"];
     }
 }
 
@@ -342,6 +364,12 @@
     }else if([segue.identifier isEqualToString:@"chooseLine"]){
         ChooseLineVC *vc = segue.destinationViewController;
         vc.metroInfoDic = self.metroInfoDic;
+    }else if([segue.identifier isEqualToString:@"quickSet"]){
+        GeoFenceViewController *vc = segue.destinationViewController;
+        
+        vc.plan = ((TripInfo *)sender).plan;
+        vc.remindMissions = ((TripInfo *)sender).remindMissions;
+        vc.startDate = [NSDate date];
     }
 }
 
@@ -388,7 +416,7 @@
                 return;
             }
         }
-        [self.view showMyToast:@"当前城市暂未开通地铁"];
+        [self.view showMyToast:@"当前城市暂未开通地铁" position:@"CSToastPositionCenter"];
     }
 }
 
@@ -410,5 +438,46 @@
     // Pass the selected object to the new view controller.
 }
 */
+
+#pragma table view
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"savedTrip"];
+    
+    if(!cell){
+        cell = [tableView dequeueReusableCellWithIdentifier:@"savedTrip" forIndexPath:indexPath];
+    }
+    
+    cell.textLabel.text = self.savedTrips.allKeys[indexPath.row];
+    TripInfo *tripInfo = [self.savedTrips objectForKey:cell.textLabel.text];
+    NSMutableString *subTitle = [NSMutableString stringWithString:@"提醒站点:"];
+    
+    for(int i=0;i<tripInfo.remindMissions.count;i++){
+        Mission *m = tripInfo.remindMissions[i];
+        [subTitle appendString:m.stop.name];
+        
+        if(i != tripInfo.remindMissions.count -1){
+            [subTitle appendString:@" "];
+        }
+    }
+    
+    cell.detailTextLabel.text = subTitle;
+    return cell;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    return self.savedTrips.count;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    TripInfo *info = [self.savedTrips objectForKey:self.savedTrips.allKeys[indexPath.row]];
+    [self performSegueWithIdentifier:@"quickSet" sender:info];
+    [tableView deselectRowAtIndexPath:indexPath animated:true];
+}
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView{
+    if(scrollView.contentOffset.y <= 0){
+        [self.savedTripTable setContentOffset:CGPointMake(0, 0)];
+    }
+}
 
 @end

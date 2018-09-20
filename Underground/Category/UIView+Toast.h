@@ -9,5 +9,5 @@
 #import <UIKit/UIKit.h>
 
 @interface UIView(Toast)
--(void)showMyToast:(NSString *)str;
+- (void)showMyToast:(NSString *)str position:(NSString *)position;
 @end

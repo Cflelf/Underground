@@ -20,9 +20,40 @@
 #import "Tools.h"
 #import "UIViewController+BackButtonHandler.h"
 #import "PlanTableViewCell.h"
+#import "UIView+Toast.h"
 
 #define Max(a,b) ( ((a) > (b)) ? (a) : (b) )
 #define Min(a,b) ( ((a) < (b)) ? (a) : (b) )
+
+@implementation TripInfo
+
+- (instancetype)initWithPlan:(Plan *)plan mission:(NSMutableArray *)mission
+{
+    self = [super init];
+    if (self) {
+        self.plan = plan;
+        self.remindMissions = mission;
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder
+{
+    [coder encodeObject:self.plan forKey:@"plan"];
+    [coder encodeObject:self.remindMissions forKey:@"remindMissions"];
+}
+
+- (instancetype)initWithCoder:(NSCoder *)coder
+{
+    self = [super init];
+    if (self) {
+        self.plan = [coder decodeObjectForKey:@"plan"];
+        self.remindMissions = [coder decodeObjectForKey:@"remindMissions"];
+    }
+    return self;
+}
+
+@end
 
 @interface GeoFenceViewController ()<AMapGeoFenceManagerDelegate,MAMapViewDelegate, AMapLocationManagerDelegate,BackButtonHandlerProtocol,UIGestureRecognizerDelegate,UITableViewDelegate,UITableViewDataSource>
 @property (nonatomic, strong) AMapLocationManager *locationManager;
@@ -37,6 +68,7 @@
 @property (strong,nonatomic) UIPanGestureRecognizer *pan;
 @property (weak, nonatomic) IBOutlet UILabel *startEndLabel;
 @property (weak, nonatomic) IBOutlet UIView *remindView;
+@property (weak, nonatomic) IBOutlet UIButton *saveButton;
 
 @end
 
@@ -67,7 +99,6 @@
     
     self.table.delegate = self;
     self.table.dataSource = self;
-    self.table.tableFooterView = [UIView new];
     self.table.estimatedRowHeight = 0;
     self.table.estimatedSectionHeaderHeight = 0;
     self.table.estimatedSectionFooterHeight = 0;
@@ -77,6 +108,7 @@
     self.mapView.delegate = self;
     self.mapView.showsUserLocation = true;
     self.mapView.userTrackingMode = MAUserTrackingModeFollow;
+    [self.mapView setZoomLevel:11.5];
     
     self.geoFenceManager = [[AMapGeoFenceManager alloc] init];
     self.geoFenceManager.delegate = self;
@@ -85,8 +117,8 @@
     
     //创建地理围栏
     for(MyBusStop *bus in self.plan.viaPlatforms){
-        CLLocationCoordinate2D coordinate = CLLocationCoordinate2DMake(bus.stop.location.latitude, bus.stop.location.longitude);
-        [self.geoFenceManager addCircleRegionForMonitoringWithCenter:coordinate radius:[RADIUS doubleValue] customID:bus.stop.name];
+        CLLocationCoordinate2D coordinate = CLLocationCoordinate2DMake(bus.location.latitude, bus.location.longitude);
+        [self.geoFenceManager addCircleRegionForMonitoringWithCenter:coordinate radius:[RADIUS doubleValue] customID:bus.name];
     }
     
     [self configLocationManager];
@@ -138,10 +170,12 @@
             [self.table setScrollEnabled:true];
         }
     }];
+
+    [self.saveButton setUserInteractionEnabled:false];
     
     [self saveInfo];
     
-    self.startEndLabel.text = [NSString stringWithFormat:@"%@ -> %@",self.plan.viaPlatforms[0].stop.name,self.plan.viaPlatforms.lastObject.stop.name];
+    self.startEndLabel.text = [NSString stringWithFormat:@"%@ -> %@",self.plan.viaPlatforms[0].name,self.plan.viaPlatforms.lastObject.name];
 }
 
 
@@ -203,14 +237,17 @@
             if([self getMission:customID] && ![self getMission:customID].completed){
                 [AppDelegate registerNotification:1 title:@"到站提醒!" body:[NSString stringWithFormat:@"%@快到了，赶紧下车啦",customID]];
                 [self getMission:customID].completed = true;
-                [manager removeGeoFenceRegionsWithCustomID:customID];
-                
-                if([self checkAllMissionComplete]){
-                    [self.locationManager stopUpdatingLocation];
-                }
+                [self checkAllMissionComplete];
             }
+            
             for(int i=0;i<self.cellArrays.count;i++) {
                 PlanTableViewCell *cell = self.cellArrays[i];
+//                unsigned long sec = [[NSDate date] timeIntervalSinceDate:self.startDate]/3600/24;
+                
+//                if(sec >= 30){
+//                    cell.stop.time = sec;
+//                    cell.timeLabel.text = [NSString stringWithFormat:@"%lu秒",sec];
+//                }
                 [cell.metroImage setHidden:true];
                 if ([cell.titleLabel.text isEqualToString:customID]) {
                     [self.table setContentOffset:CGPointMake(0, Max(0, i-3)*44) animated:true];
@@ -225,6 +262,8 @@
                     break;
                 }
             }
+            self.startDate = [NSDate date];
+            [manager removeGeoFenceRegionsWithCustomID:customID];
         }
     }
 }
@@ -260,15 +299,15 @@
             return false;
         }
     }
-    
+    [self.locationManager stopUpdatingLocation];
     [self updateToFinishView];
     return true;
 }
 
 - (void)updateToFinishView{
+    [self.saveButton setUserInteractionEnabled:true];
+    [self.saveButton setBackgroundColor:ThemeColor];
     self.title = @"当前行程已完成";
-    
-    
 }
 
 - (BOOL)navigationShouldPopOnBackButton{
@@ -306,8 +345,9 @@
             cell = [self.table dequeueReusableCellWithIdentifier:@"plan" forIndexPath:[NSIndexPath indexPathForItem:i inSection:0]];
         }
         
-        cell.titleLabel.text = bus.stop.name;
+        cell.titleLabel.text = bus.name;
         cell.subTitle.text = bus.line;
+        cell.stop = bus;
         
         if(i == 0){
             cell.typeLabel = [cell.typeLabel initWithStyle:MetroPFTypeStart text:@"起始站"];
@@ -316,7 +356,7 @@
         }
         
         for(AMapBusStop *stop in self.plan.changePlatforms){
-            if([stop.name isEqualToString:bus.stop.name]){
+            if([stop.name isEqualToString:bus.name]){
                 cell.typeLabel = [cell.typeLabel initWithStyle:MetroPFTypeChange text:@"换乘"];
                 break;
             }
@@ -377,5 +417,25 @@
     // Pass the selected object to the new view controller.
 }
 */
+- (IBAction)saveTrip:(UIButton *)sender {
+    [sender setUserInteractionEnabled:false];
+    TripInfo *info = [[TripInfo alloc] initWithPlan:self.plan mission:self.remindMissions];
+    NSMutableDictionary *dic;
+    if([NSUserDefaults.standardUserDefaults objectForKey:@"savedTrip"]){
+        dic = [Tools toArrayOrNSDictionary:[NSUserDefaults.standardUserDefaults objectForKey:@"savedTrip"]];
+    }else{
+        dic = [NSMutableDictionary new];
+    }
+    [dic setObject:info forKey:self.startEndLabel.text];
+    [NSUserDefaults.standardUserDefaults setObject:[Tools toJSONData:dic] forKey:@"savedTrip"];
+    
+    [self.view showMyToast:@"保存成功" position:@"CSToastPositionCenter"];
+    
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self.navigationController popToRootViewControllerAnimated:true];
+    });
+    
+}
 
 @end
+

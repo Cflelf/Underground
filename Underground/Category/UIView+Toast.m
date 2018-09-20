@@ -13,11 +13,12 @@
 
 @implementation UIView(Toast)
 
-- (void)showMyToast:(NSString *)str{
+- (void)showMyToast:(NSString *)str position:(NSString *)position{
     CSToastStyle *style = [[CSToastStyle alloc] initWithDefaultStyle];
     style.backgroundColor = ThemeColor;
     style.messageColor = UIColor.whiteColor;
-    [self makeToast:str duration:1 position:CSToastPositionBottom style:style];
+    style.shadowRadius = 0.5;
+    [self makeToast:str duration:1 position:position style:style];
 }
 
 @end

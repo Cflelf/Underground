@@ -9,10 +9,10 @@
 #import <Foundation/Foundation.h>
 #import <AMapSearchKit/AMapSearchKit.h>
 
-@interface MyBusStop : NSObject
+@interface MyBusStop : AMapBusStop
 
-@property(nonatomic,strong)AMapBusStop *stop;
-@property(nonatomic,strong)NSString *line;
+@property(nonatomic,copy)NSString *line;
+@property(nonatomic,assign)unsigned long time;
 
 @end
 

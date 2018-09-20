@@ -60,7 +60,7 @@
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
     
     if ([self.platforms[indexPath.row] containsString:@"未开通"]) {
-        [self.view showMyToast:@"该线路暂未开通"];
+        [self.view showMyToast:@"该线路暂未开通" position:@"CSToastPositionCenter"];
         return;
     }
     

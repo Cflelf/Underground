@@ -220,9 +220,9 @@
     
     Plan *plan = self.plans[indexPath.section];
     
-    cell.titleLabel.text = plan.viaPlatforms[indexPath.row].stop.name;
+    cell.titleLabel.text = plan.viaPlatforms[indexPath.row].name;
     cell.subTitle.text = plan.viaPlatforms[indexPath.row].line;
-    cell.stop = plan.viaPlatforms[indexPath.row].stop;
+    cell.stop = plan.viaPlatforms[indexPath.row];
     
     if(indexPath.row == 0){
         [cell.chooseButton setHidden:true];
@@ -236,7 +236,7 @@
     }
     
     for(AMapBusStop *stop in plan.changePlatforms){
-        if([stop.name isEqualToString:plan.viaPlatforms[indexPath.row].stop.name]){
+        if([stop.name isEqualToString:plan.viaPlatforms[indexPath.row].name]){
             cell.typeLabel = [cell.typeLabel initWithStyle:MetroPFTypeChange text:@"换乘"];
             [cell.chooseButton setHidden:false];
             break;
@@ -274,6 +274,7 @@
             [vc.remindMissions addObject:[[Mission alloc] initWithStop:cell.stop]];
         }
         vc.plan = ((PlanTableHeaderView *)self.sectionArray[[self.currentSection intValue]*2]).plan;
+        vc.startDate = [NSDate date];
     }
 }
 
